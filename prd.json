@@ -1,0 +1,641 @@
+{
+  "project": "Argile",
+  "description": "Export FEC (Fichier des Ecritures Comptables) - Génération de fichiers CSV comptables réglementaires français pour OWNER/MANAGER",
+  "repositories": {
+    "argile-lib-python": {
+      "branchName": "feature/fec-export",
+      "activeBranch": "feature/fec-export-1"
+    },
+    "remi-web-ui": {
+      "branchName": "feature/fec-export"
+    }
+  },
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Migration - Renommer les champs PDF en Document",
+      "repo": "argile-lib-python",
+      "description": "As a developer, I need to rename PDF-specific columns to generic document columns to support multiple file formats.",
+      "acceptanceCriteria": [
+        "Créer migration Alembic pour renommer trame_pdf_url → trame_document_url",
+        "Renommer generated_pdf_url → generated_document_url",
+        "Renommer signed_pdf_url → signed_document_url",
+        "Migration réversible (downgrade fonctionne)",
+        "Tests pass (pytest)"
+      ],
+      "priority": 1,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-08. Migration: 20260108_rename_pdf_to_doc. Commit: 546c23647"
+    },
+    {
+      "id": "US-002",
+      "title": "Ajouter l'enum DocumentFormat et le type FEC_EXPORT",
+      "repo": "argile-lib-python",
+      "description": "As a developer, I need a document format enum and FEC_EXPORT type to distinguish file types.",
+      "acceptanceCriteria": [
+        "Ajouter DocumentFormat enum (PDF, CSV, XLSX) dans doc_instances/models/document.py",
+        "Ajouter champ document_format avec default PDF dans DocumentInstanceBase",
+        "Ajouter FEC_EXPORT dans DocumentType enum",
+        "Créer migration Alembic pour le nouveau champ",
+        "Tests pass (pytest)"
+      ],
+      "priority": 2,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-08. Migration: 20260108_doc_format_fec. Commit: 5a492942a"
+    },
+    {
+      "id": "US-003",
+      "title": "Créer le module finances avec constantes comptables",
+      "repo": "argile-lib-python",
+      "description": "As a developer, I need a finances module with FEC accounting constants.",
+      "acceptanceCriteria": [
+        "Créer structure argile/modules/finances/ avec __init__.py",
+        "Créer constants.py avec codes comptables clients TTC: COMPTE_CLIENT_TVA_55=41100000, COMPTE_CLIENT_TVA_10=41110000, COMPTE_CLIENT_TVA_20=41120000",
+        "Ajouter codes comptables travaux HT: COMPTE_TRAVAUX_TVA_55=70400500, COMPTE_TRAVAUX_TVA_10=70400100, COMPTE_TRAVAUX_TVA_20=70400200",
+        "Ajouter codes TVA collectée: COMPTE_TVA_55=44570000, COMPTE_TVA_10=44571000, COMPTE_TVA_20=44572000",
+        "Définir les libellés FEC correspondants et FEC_JOURNAL_CODE=VE",
+        "Tests pass (pytest)"
+      ],
+      "priority": 3,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-08. Created finances module with FEC accounting constants. Commit: a5034162d"
+    },
+    {
+      "id": "US-004",
+      "title": "Créer les schémas Pydantic du module finances",
+      "repo": "argile-lib-python",
+      "description": "As a developer, I need Pydantic schemas for FEC API requests and responses.",
+      "acceptanceCriteria": [
+        "Créer schemas.py dans le module finances",
+        "Implémenter FECGenerateRequest (start_date, end_date, branch_ids)",
+        "Implémenter FECLine (journal_code, ecriture_date, compte_num, compte_lib, comp_aux_lib, debit, credit)",
+        "Implémenter InvoiceTaxBreakdown (montants par taux TVA)",
+        "Implémenter FECDocumentRead et FECWorkflowStarted",
+        "Tests pass (pytest)"
+      ],
+      "priority": 4,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-08. Created schemas.py with all FEC Pydantic schemas. Commit: 02203d75a"
+    },
+    {
+      "id": "US-005",
+      "title": "Implémenter les permissions FEC (OWNER/MANAGER)",
+      "repo": "argile-lib-python",
+      "description": "As an OWNER or MANAGER, I need exclusive access to FEC exports so that financial data is protected.",
+      "acceptanceCriteria": [
+        "Créer permissions.py avec FECPermissionManager",
+        "Enregistrer permissions FEC_READ et FEC_CREATE",
+        "Seuls ADMIN, OWNER et MANAGER peuvent accéder",
+        "Implémenter get_accessible_branch_ids(user) selon le rôle",
+        "Tests pass (pytest)"
+      ],
+      "priority": 5,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-08. Created permissions.py with FECPermissionManager. Added FEC_CREATE/FEC_READ to EventType. Commit: 718b83bb9"
+    },
+    {
+      "id": "US-006",
+      "title": "Implémenter get_invoices_for_fec dans helpers",
+      "repo": "argile-lib-python",
+      "description": "As a developer, I need to retrieve validated invoices filtered by date and branch for FEC export.",
+      "acceptanceCriteria": [
+        "Créer helpers.py dans le module finances",
+        "Implémenter get_invoices_for_fec(start_date, end_date, branch_ids, session)",
+        "Filtrer par date de facturation (submit_at) dans l'intervalle",
+        "Filtrer par statut validé (accepted, paid, partially_paid)",
+        "Filtrer par branch via lead.branch_id",
+        "Tests pass (pytest)"
+      ],
+      "priority": 6,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-08. Created helpers.py with get_invoices_for_fec function. Commit: cda762779"
+    },
+    {
+      "id": "US-007",
+      "title": "Implémenter extract_tax_breakdown pour ventilation TVA",
+      "repo": "argile-lib-python",
+      "description": "As a developer, I need to extract tax breakdown by rate from invoices.",
+      "acceptanceCriteria": [
+        "Implémenter extract_tax_breakdown(invoice) dans helpers.py",
+        "Extraire HT/TVA/TTC pour chaque taux (5.5%, 10%, 20%)",
+        "Utiliser invoice.funding.base_tax_rate_* et total_tax_rate_*",
+        "Générer le numéro client via lead.customer_number",
+        "Tests pass (pytest)"
+      ],
+      "priority": 7,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-08. Implemented extract_tax_breakdown function. Commit: 94fd928ac"
+    },
+    {
+      "id": "US-008",
+      "title": "Implémenter generate_fec_lines pour les lignes FEC",
+      "repo": "argile-lib-python",
+      "description": "As a developer, I need to generate FEC lines with proper debit/credit for each invoice.",
+      "acceptanceCriteria": [
+        "Implémenter generate_fec_lines(breakdown) dans helpers.py",
+        "Générer jusqu'à 9 lignes par facture: 3 client TTC, 3 travaux HT, 3 TVA collectée",
+        "CompAuxLib = numéro client pour TOUTES les lignes d'une facture",
+        "Pour factures classiques: client TTC en Credit, travaux HT en Debit, TVA en Debit",
+        "Formater les montants avec virgule décimale (ex: 1234,56), zéro = 0,00",
+        "Date au format AAAAMMJJ, ne pas générer ligne si montant = 0",
+        "Tests pass (pytest)"
+      ],
+      "priority": 8,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-08. Added generate_fec_lines function with helper functions. Commit: e6d8b4cd5"
+    },
+    {
+      "id": "US-009",
+      "title": "Implémenter generate_fec_csv pour le fichier CSV",
+      "repo": "argile-lib-python",
+      "description": "As a developer, I need to generate a FEC-compliant CSV file.",
+      "acceptanceCriteria": [
+        "Implémenter generate_fec_csv(lines) dans helpers.py",
+        "Utiliser point-virgule comme délimiteur",
+        "Encoder en UTF-8 avec BOM pour compatibilité Excel",
+        "En-têtes: JournalCode, EcritureDate, CompteNum, CompteLib, CompAuxLib, Debit, Credit",
+        "Si aucune facture, générer fichier avec uniquement les en-têtes",
+        "Retourner un BytesIO prêt pour upload S3",
+        "Tests pass (pytest)"
+      ],
+      "priority": 9,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-08. Added generate_fec_csv function with UTF8 BOM support. Commit: ec69a98ae"
+    },
+    {
+      "id": "US-010",
+      "title": "Implémenter create_pending_fec_document",
+      "repo": "argile-lib-python",
+      "description": "As a developer, I need to create a DocumentInstance in pending status before workflow execution.",
+      "acceptanceCriteria": [
+        "Implémenter create_pending_fec_document(start_date, end_date, branch_ids, user, session)",
+        "Créer DocumentInstance avec type=FEC_EXPORT, document_format=CSV",
+        "Status initial = pending",
+        "Stocker les paramètres dans document.data (start_date, end_date, branch_ids en JSON)",
+        "Générer le titre au format FEC - DD/MM/AAAA - DD/MM/AAAA",
+        "Tests pass (pytest)"
+      ],
+      "priority": 10,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-08. Added create_pending_fec_document function. Commit: a8aa720c9"
+    },
+    {
+      "id": "US-011",
+      "title": "Créer l'activité generate_document_file (refactoring)",
+      "repo": "argile-lib-python",
+      "description": "As a developer, I need to refactor generate_document_pdf to support multiple file types.",
+      "acceptanceCriteria": [
+        "Créer argile/vendors/temporal/activities/documents.py",
+        "Déplacer les fonctions _get_invoice_pdf_url, _get_quote_pdf_url, _get_document_pdf_from_trame, _get_pdf_from_html_url depuis document_signatures.py",
+        "Renommer l'activité generate_document_pdf → generate_document_file",
+        "Ajouter _get_fec_csv_url pour type FEC_EXPORT",
+        "Ajouter activité mark_document_as_error",
+        "Tests pass (pytest)"
+      ],
+      "priority": 11,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-08. Created documents.py with generate_document_file activity. Commit: bfc464abe"
+    },
+    {
+      "id": "US-012",
+      "title": "Mettre à jour document_signatures.py pour utiliser le nouveau module",
+      "repo": "argile-lib-python",
+      "description": "As a developer, I need to update existing imports to use the refactored documents module.",
+      "acceptanceCriteria": [
+        "Importer depuis activities.documents au lieu des fonctions locales",
+        "Ajouter alias generate_document_pdf = generate_document_file pour rétrocompatibilité",
+        "Supprimer les fonctions déplacées",
+        "Mettre à jour le workflow create_document_signature.py",
+        "Tests pass (pytest)"
+      ],
+      "priority": 12,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-08. Removed duplicated functions from document_signatures.py. Commit: 5f854f9c8"
+    },
+    {
+      "id": "US-013",
+      "title": "Créer le workflow GenerateFECWorkflow",
+      "repo": "argile-lib-python",
+      "description": "As a developer, I need a Temporal workflow to generate FEC documents asynchronously.",
+      "acceptanceCriteria": [
+        "Créer argile/vendors/temporal/workflows/generate_fec.py",
+        "Implémenter GenerateFECWorkflow avec timeout 10 minutes",
+        "Appeler generate_document_file qui détecte FEC_EXPORT",
+        "En cas d'erreur, appeler mark_document_as_error",
+        "Configurer retry policy (3 tentatives max)",
+        "Tests pass (pytest)"
+      ],
+      "priority": 13,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-08. Created GenerateFECWorkflow with 10min timeout and 3 retries. Commit: e83a35947"
+    },
+    {
+      "id": "US-014",
+      "title": "Enregistrer le workflow et activities dans le worker Temporal",
+      "repo": "argile-lib-python",
+      "description": "As a developer, I need to register the new workflow and activities in the Temporal worker.",
+      "acceptanceCriteria": [
+        "Ajouter GenerateFECWorkflow à la liste des workflows",
+        "Ajouter generate_document_file et mark_document_as_error aux activities",
+        "Retirer generate_document_pdf si présent (remplacé)",
+        "Worker démarre sans erreur",
+        "Tests pass (pytest)"
+      ],
+      "priority": 14,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-08. Updated local_worker.py to register GenerateFECWorkflow, generate_document_file, and mark_document_as_error. Replaced generate_document_pdf with generate_document_file. Commit: b64c8a029"
+    },
+    {
+      "id": "US-015",
+      "title": "Implémenter l'endpoint POST /finances/documents/generate",
+      "repo": "argile-lib-python",
+      "description": "As an OWNER/MANAGER, I want to start a FEC export so that I can download it later.",
+      "acceptanceCriteria": [
+        "Créer api.py avec router prefix=/finances",
+        "Endpoint POST /finances/documents/generate",
+        "Valider permissions FEC_CREATE",
+        "Valider accès aux branches demandées",
+        "Créer document pending puis lancer workflow Temporal",
+        "Retourner FECWorkflowStarted (document_id, workflow_id, status)",
+        "Tests pass (pytest)"
+      ],
+      "priority": 15,
+      "passes": true,
+      "fork": true,
+      "notes": "Completed 2026-01-09. Created api.py with POST /finances/documents/generate endpoint. Commit: b9aa117fb"
+    },
+    {
+      "id": "US-016",
+      "title": "Implémenter l'endpoint GET /finances/documents",
+      "repo": "argile-lib-python",
+      "description": "As an OWNER/MANAGER, I want to list my FEC documents to see their status.",
+      "acceptanceCriteria": [
+        "Endpoint GET /finances/documents",
+        "Valider permissions FEC_READ",
+        "Filtrer par branches accessibles à l'utilisateur",
+        "Retourner liste de FECDocumentRead",
+        "Tests pass (pytest)"
+      ],
+      "priority": 16,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-09. Added GET /finances/documents endpoint with branch filtering. Commit: c4537142e"
+    },
+    {
+      "id": "US-017",
+      "title": "Implémenter l'endpoint GET /finances/documents/{id}",
+      "repo": "argile-lib-python",
+      "description": "As an OWNER/MANAGER, I want to get details of a specific FEC document.",
+      "acceptanceCriteria": [
+        "Endpoint GET /finances/documents/{document_id}",
+        "Valider permissions FEC_READ",
+        "Valider accès aux branches du document",
+        "Retourner FECDocumentRead avec URL de téléchargement si signed",
+        "Tests pass (pytest)"
+      ],
+      "priority": 17,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-09. Added GET /finances/documents/{document_id} endpoint with permission and branch access validation. Commit: 164c05c83"
+    },
+    {
+      "id": "US-018",
+      "title": "Implémenter les endpoints DELETE et PUT /rename",
+      "repo": "argile-lib-python",
+      "description": "As an OWNER/MANAGER, I want to manage my FEC documents (delete, rename).",
+      "acceptanceCriteria": [
+        "Endpoint DELETE /finances/documents/{id} (soft delete)",
+        "Endpoint PUT /finances/documents/{id}/rename avec new_title",
+        "Valider permissions FEC_CREATE",
+        "Valider accès aux branches du document",
+        "Tests pass (pytest)"
+      ],
+      "priority": 18,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-09. Added DELETE and PUT /rename endpoints with FEC_CREATE permission validation. Commit: 7f539167e"
+    },
+    {
+      "id": "US-019",
+      "title": "Implémenter l'endpoint GET /finances/branches",
+      "repo": "argile-lib-python",
+      "description": "As an OWNER/MANAGER, I want to see which branches I can export for FEC.",
+      "acceptanceCriteria": [
+        "Endpoint GET /finances/branches",
+        "Valider permissions FEC_READ",
+        "Retourner les branches accessibles selon le rôle",
+        "Tests pass (pytest)"
+      ],
+      "priority": 19,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-09. Added GET /finances/branches endpoint with role-based branch filtering. Uses crm.BranchRead schema. Commit: 2c4087c49"
+    },
+    {
+      "id": "US-020",
+      "title": "Enregistrer le router finances dans l'application",
+      "repo": "argile-lib-python",
+      "description": "As a developer, I need to register the finances router in the main FastAPI app.",
+      "acceptanceCriteria": [
+        "Ajouter import du router finances dans argile/api.py",
+        "Inclure le router avec app.include_router(finances_api.router)",
+        "Les endpoints sont accessibles via /finances/*",
+        "Tests pass (pytest)"
+      ],
+      "priority": 20,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-09. Added finances to modules/__init__.py import list and __all__. Router registration happens automatically via router_manager pattern. Commit: cf5e55604"
+    },
+    {
+      "id": "US-021",
+      "title": "Tests unitaires pour les helpers FEC",
+      "repo": "argile-lib-python",
+      "description": "As a developer, I need unit tests to verify FEC generation logic.",
+      "acceptanceCriteria": [
+        "Créer structure de tests argile/modules/finances/test/",
+        "Test test_extract_tax_breakdown_with_multiple_rates",
+        "Test test_generate_fec_lines_classic_invoice",
+        "Test test_format_amount_french_locale",
+        "Tests pass (pytest)"
+      ],
+      "priority": 21,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-09. Added 3 required tests: test_extract_tax_breakdown_with_multiple_rates, test_generate_fec_lines_classic_invoice, test_format_amount_french_locale. Commit: e9325e55f"
+    },
+    {
+      "id": "US-022",
+      "title": "Tests d'intégration API et permissions",
+      "repo": "argile-lib-python",
+      "description": "As a developer, I need integration tests to verify API endpoints and permissions.",
+      "acceptanceCriteria": [
+        "Test test_generate_fec_owner_success",
+        "Test test_generate_fec_manager_own_branches",
+        "Test test_generate_fec_regular_forbidden (REGULAR n'a pas accès)",
+        "Test test_owner_sees_all_company_branches",
+        "Tests pass (pytest)"
+      ],
+      "priority": 22,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-09. Added 8 integration tests: OWNER/MANAGER/REGULAR permission tests, branch access tests, admin tests. Commit: 9cb47e959"
+    },
+    {
+      "id": "US-023",
+      "title": "Créer les types et schémas Zod pour FEC",
+      "repo": "remi-web-ui",
+      "description": "As a frontend developer, I need TypeScript types and Zod schemas for FEC API responses.",
+      "acceptanceCriteria": [
+        "Créer app/settings/finances/core/schemas.ts",
+        "Définir types FecExport, FecExportStatus, FecGenerateRequest",
+        "Créer schémas Zod pour validation",
+        "Tests pass (npm run test)"
+      ],
+      "priority": 23,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-09. Created schemas.ts with FecExportStatus enum, Zod schemas, and API types. Commit: 4f4082935"
+    },
+    {
+      "id": "US-024",
+      "title": "Créer les fonctions API pour FEC",
+      "repo": "remi-web-ui",
+      "description": "As a frontend developer, I need API functions to interact with FEC endpoints.",
+      "acceptanceCriteria": [
+        "Créer app/settings/finances/core/api.ts",
+        "Implémenter getFecExports() - GET /finances/documents",
+        "Implémenter getFecExport(id) - GET /finances/documents/{id}",
+        "Implémenter generateFec(request) - POST /finances/documents/generate",
+        "Implémenter deleteFecExport(id) - DELETE /finances/documents/{id}",
+        "Implémenter renameFecExport(id, name) - PUT /finances/documents/{id}/rename",
+        "Implémenter getAccessibleBranches() - GET /finances/branches",
+        "Tests passes (npm run test)"
+      ],
+      "priority": 24,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-09. Created api.ts with all FEC API functions. Commit: 4f4082935"
+    },
+    {
+      "id": "US-025",
+      "title": "Créer le hook useFecExports pour lister les exports",
+      "repo": "remi-web-ui",
+      "description": "As a frontend developer, I need a React Query hook to fetch the list of FEC exports.",
+      "acceptanceCriteria": [
+        "Créer app/settings/finances/core/hooks/useFecExports.ts",
+        "Utiliser React Query avec queryKey [fec-exports]",
+        "Retourner liste typée de FecExport",
+        "Tests passes (npm run test)"
+      ],
+      "priority": 25,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-09. Created useFecExports hook with React Query. Commit: 4f4082935"
+    },
+    {
+      "id": "US-026",
+      "title": "Créer le hook useFecExport avec polling",
+      "repo": "remi-web-ui",
+      "description": "As a frontend developer, I need a React Query hook that polls for status updates.",
+      "acceptanceCriteria": [
+        "Créer app/settings/finances/core/hooks/useFecExport.ts",
+        "Poll toutes les 2 secondes si status = pending",
+        "Arrêter le polling si status = signed ou rejected",
+        "Tests passes (npm run test)"
+      ],
+      "priority": 26,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-09. Created useFecExport hook with 2-second polling while pending. Commit: 4f4082935"
+    },
+    {
+      "id": "US-027",
+      "title": "Créer le hook useGenerateFec pour la mutation",
+      "repo": "remi-web-ui",
+      "description": "As a frontend developer, I need a React Query mutation hook to generate FEC exports.",
+      "acceptanceCriteria": [
+        "Créer app/settings/finances/core/hooks/useGenerateFec.ts",
+        "Mutation qui appelle POST /finances/documents/generate",
+        "Invalider le cache [fec-exports] on success",
+        "Tests passes (npm run test)"
+      ],
+      "priority": 27,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-09. Created useGenerateFec mutation hook with cache invalidation. Commit: 4f4082935"
+    },
+    {
+      "id": "US-028",
+      "title": "Créer la page Finances dans les paramètres",
+      "repo": "remi-web-ui",
+      "description": "As an OWNER/MANAGER, I want to access a Finances page in settings to manage FEC exports.",
+      "acceptanceCriteria": [
+        "Créer app/settings/finances/page.tsx",
+        "Afficher le titre Finances - Gérez vos fichiers financiers",
+        "Intégrer le composant FecExportsTable",
+        "Bouton +Générer un document pour ouvrir la modal",
+        "Tests passes (npm run test)",
+        "App launches (npm run dev",
+        "Verify in browser"
+      ],
+      "priority": 28,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-09. Created page.tsx with title, FecExportsTable, and generate button. Commit: 4f4082935"
+    },
+    {
+      "id": "US-029",
+      "title": "Créer le composant FecStatusBadge",
+      "repo": "remi-web-ui",
+      "description": "As a user, I want to see the status of each FEC export with a colored badge.",
+      "acceptanceCriteria": [
+        "Créer app/settings/finances/components/FecStatusBadge.tsx",
+        "Badge jaune pour pending (en cours de génération)",
+        "Badge vert pour signed (completed/terminé)",
+        "Badge rouge pour rejected (error/erreur)",
+        "Tests passes (npm run test)",
+        "App launches (npm run dev",
+        "Verify in browser"
+      ],
+      "priority": 29,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-09. Created FecStatusBadge with yellow/green/red badges. Commit: 4f4082935"
+    },
+    {
+      "id": "US-030",
+      "title": "Créer le composant FecExportsTable",
+      "repo": "remi-web-ui",
+      "description": "As an OWNER/MANAGER, I want to see a table of all my FEC exports with their status.",
+      "acceptanceCriteria": [
+        "Créer app/settings/finances/components/FecExportsTable.tsx",
+        "Colonnes: Nom, Période, Filiales, Status, Date création, Actions",
+        "Colonne Période au format DD/MM/AAAA - DD/MM/AAAA",
+        "Colonne Filiales: liste des noms séparés par virgules",
+        "Intégrer FecStatusBadge pour la colonne Status",
+        "L'utilisateur ne voit que les FEC contenant des filiales auxquelles il a accès",
+        "État vide si aucun export",
+        "Tests passes (npm run test)",
+        "App launches (npm run dev",
+        "Verify in browser"
+      ],
+      "priority": 30,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-09. Created FecExportsTable with all columns and empty state. Commit: 4f4082935"
+    },
+    {
+      "id": "US-031",
+      "title": "Créer le composant FecActions (menu actions)",
+      "repo": "remi-web-ui",
+      "description": "As an OWNER/MANAGER, I want action buttons to download, rename, or delete FEC exports.",
+      "acceptanceCriteria": [
+        "Créer app/settings/finances/components/FecActions.tsx",
+        "Bouton Télécharger (visible si status = signed)",
+        "Bouton Renommer (ouvre input inline ou modal)",
+        "Bouton Supprimer (avec confirmation)",
+        "Actions désactivées si status = pending",
+        "Tests passes (npm run test)",
+        "App launches (npm run dev",
+        "Verify in browser"
+      ],
+      "priority": 31,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-09. Created FecActions with download/rename/delete menu and dialogs. Commit: 4f4082935"
+    },
+    {
+      "id": "US-032",
+      "title": "Créer la modal GenerateFecModal",
+      "repo": "remi-web-ui",
+      "description": "As an OWNER/MANAGER, I want a modal to configure and generate a new FEC export.",
+      "acceptanceCriteria": [
+        "Créer app/settings/finances/components/GenerateFecModal.tsx",
+        "Étape 1: Sélection du type de document (pour l'instant uniquement Exporter un FEC)",
+        "Étape 2: Sélecteur de période (date début, date fin)",
+        "Étape 2: Sélecteur multi-branches avec boutons Tout sélectionner / Tout désélectionner",
+        "Les managers ne voient que leurs filiales, les directeurs voient toutes les filiales",
+        "Bouton Générer qui lance useGenerateFec",
+        "Tests passes (npm run test)",
+        "App launches (npm run dev",
+        "Verify in browser"
+      ],
+      "priority": 32,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-09. Created GenerateFecModal with date range, branch selection, and generate flow. Commit: 4f4082935"
+    },
+    {
+      "id": "US-033",
+      "title": "Implémenter le polling et feedback pendant la génération",
+      "repo": "remi-web-ui",
+      "description": "As a user, I want to see progress while my FEC export is being generated.",
+      "acceptanceCriteria": [
+        "Afficher spinner dans la modal pendant status = pending",
+        "Message Génération en cours...",
+        "Afficher Export terminé ! quand status = signed",
+        "Afficher message d'erreur si status = rejected",
+        "Bouton Télécharger disponible une fois terminé (status = signed)",
+        "Tests passes (npm run test)",
+        "App launches (npm run dev",
+        "Verify in browser"
+      ],
+      "priority": 33,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-09. Modal shows spinner/progress, completion, error states with download button. Commit: 4f4082935"
+    },
+    {
+      "id": "US-034",
+      "title": "Ajouter la navigation vers Finances dans le menu paramètres",
+      "repo": "remi-web-ui",
+      "description": "As an OWNER/MANAGER, I want to access the Finances page from the settings menu.",
+      "acceptanceCriteria": [
+        "Ajouter lien Finances dans le menu settings (sidebar ou navigation)",
+        "Lien visible uniquement pour OWNER/MANAGER (contrôle d'accès côté client)",
+        "Icône appropriée (ex: currency, chart)",
+        "Tests passes (npm run test)",
+        "App launches (npm run dev",
+        "Verify in browser"
+      ],
+      "priority": 34,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-09. Added Finances link to MainSettingsMenu with CHART icon. Role-based visibility using requiresHighRole flag. Commit: ab901e492"
+    },
+    {
+      "id": "US-035",
+      "title": "Gérer le contrôle d'accès frontend (OWNER/MANAGER uniquement)",
+      "repo": "remi-web-ui",
+      "description": "As a REGULAR user, I should not see or access the Finances page.",
+      "acceptanceCriteria": [
+        "Rediriger vers 403 ou page d'accueil si utilisateur non autorisé",
+        "Masquer le lien Finances dans le menu pour les non-autorisés",
+        "Utiliser le hook existant de vérification des rôles",
+        "Tests passes (npm run test)",
+        "Build passes (npm run build)",
+        "App launches (npm run dev",
+        "Verify in browser"
+      ],
+      "priority": 35,
+      "passes": true,
+      "fork": false,
+      "notes": "Completed 2026-01-09. Added role check with unauthorized message on page. Link hidden in menu via US-034. Build passes. Commit: e9ab95e25"
+    }
+  ]
+}

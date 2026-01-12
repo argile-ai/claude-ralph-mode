@@ -1,0 +1,89 @@
+{
+  "project": "TaskPriority",
+  "description": "Task Priority System - Add priority levels to tasks",
+  "repositories": {
+    "argile-lib-python": {
+      "branchName": "feature/task-priority"
+    },
+    "remi-web-ui": {
+      "branchName": "feature/task-priority"
+    }
+  },
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Add priority field to database",
+      "repo": "argile-lib-python",
+      "description": "As a developer, I need to store task priority so it persists across sessions.",
+      "acceptanceCriteria": [
+        "Add priority column to tasks table: 'high' | 'medium' | 'low' (default 'medium')",
+        "Generate and run migration successfully",
+        "Tests pass (pytest)"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Add priority API endpoints",
+      "repo": "argile-lib-python",
+      "description": "As a frontend developer, I need API endpoints to get and update task priority.",
+      "acceptanceCriteria": [
+        "GET /tasks/{id} includes priority field",
+        "PATCH /tasks/{id} accepts priority updates",
+        "Tests pass (pytest)"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Display priority indicator on task cards",
+      "repo": "remi-web-ui",
+      "description": "As a user, I want to see task priority at a glance.",
+      "acceptanceCriteria": [
+        "Each task card shows colored priority badge (red=high, yellow=medium, gray=low)",
+        "Priority visible without hovering or clicking",
+        "Build passes (npm run build)",
+        "Verify in browser"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Add priority selector to task edit",
+      "repo": "remi-web-ui",
+      "description": "As a user, I want to change a task's priority when editing it.",
+      "acceptanceCriteria": [
+        "Priority dropdown in task edit modal",
+        "Shows current priority as selected",
+        "Saves immediately on selection change via API",
+        "Build passes (npm run build)",
+        "Verify in browser"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Filter tasks by priority",
+      "repo": "remi-web-ui",
+      "description": "As a user, I want to filter the task list to see only high-priority items.",
+      "acceptanceCriteria": [
+        "Filter dropdown with options: All | High | Medium | Low",
+        "Filter persists in URL params",
+        "Empty state message when no tasks match filter",
+        "Build passes (npm run build)",
+        "Verify in browser"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
