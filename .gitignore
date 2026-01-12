@@ -1,0 +1,17 @@
+# Generated files (user-specific)
+plan.md
+prd.json
+progress.txt
+.last-project
+
+# Archives (user-specific)
+archive/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~

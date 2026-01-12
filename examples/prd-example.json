@@ -1,0 +1,116 @@
+{
+  "project": "MyApp - User Authentication",
+  "description": "Add OAuth-based user authentication to the application",
+  "repositories": {
+    "backend": {
+      "branchName": "feature/user-auth"
+    },
+    "frontend": {
+      "branchName": "feature/user-auth"
+    }
+  },
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Add User Model",
+      "repo": "backend",
+      "description": "As a developer, I need a User model to store authenticated user information.",
+      "acceptanceCriteria": [
+        "User model with fields: id, email, name, provider, provider_id, created_at",
+        "Alembic migration created and tested",
+        "Tests pass (pytest)"
+      ],
+      "priority": 1,
+      "passes": false,
+      "fork": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Add OAuth Configuration",
+      "repo": "backend",
+      "description": "As a developer, I need OAuth configuration for Google and GitHub providers.",
+      "acceptanceCriteria": [
+        "Environment variables for GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET",
+        "Environment variables for GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET",
+        "OAuth configuration module created",
+        "Tests pass (pytest)"
+      ],
+      "priority": 2,
+      "passes": false,
+      "fork": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Add Auth Endpoints",
+      "repo": "backend",
+      "description": "As a user, I want API endpoints to authenticate via OAuth.",
+      "acceptanceCriteria": [
+        "GET /auth/google - Redirects to Google OAuth",
+        "GET /auth/google/callback - Handles Google callback",
+        "GET /auth/github - Redirects to GitHub OAuth",
+        "GET /auth/github/callback - Handles GitHub callback",
+        "POST /auth/logout - Ends session",
+        "GET /auth/me - Returns current user",
+        "Tests pass (pytest)"
+      ],
+      "priority": 3,
+      "passes": false,
+      "fork": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Add Login Page",
+      "repo": "frontend",
+      "description": "As a user, I want a login page with OAuth buttons.",
+      "acceptanceCriteria": [
+        "Login page at /login route",
+        "Sign in with Google button",
+        "Sign in with GitHub button",
+        "Loading state while authenticating",
+        "Build passes (npm run build)",
+        "Verify in browser"
+      ],
+      "priority": 4,
+      "passes": false,
+      "fork": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Add Auth Context",
+      "repo": "frontend",
+      "description": "As a developer, I need React context to manage auth state.",
+      "acceptanceCriteria": [
+        "AuthContext with user state",
+        "useAuth hook for components",
+        "Automatic session check on mount",
+        "Build passes (npm run build)",
+        "Verify in browser"
+      ],
+      "priority": 5,
+      "passes": false,
+      "fork": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Add Protected Routes",
+      "repo": "frontend",
+      "description": "As a user, I should be redirected to login if not authenticated.",
+      "acceptanceCriteria": [
+        "ProtectedRoute wrapper component",
+        "Redirects to /login if not authenticated",
+        "Shows loading while checking auth",
+        "Build passes (npm run build)",
+        "Verify in browser"
+      ],
+      "priority": 6,
+      "passes": false,
+      "fork": false,
+      "notes": ""
+    }
+  ]
+}

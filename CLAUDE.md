@@ -1,35 +1,49 @@
-# Ralph Agent Instructions
+# Ralph - Claude Code Plugin
 
 ## Overview
 
 Ralph is an autonomous AI agent loop that runs Claude Code repeatedly until all PRD items are complete. Each iteration is a fresh Claude Code instance with clean context.
 
-## Multi-Repository Setup
-
-This project works with TWO SEPARATE git repositories:
-- `argile-lib-python/` - Backend FastAPI (git@github.com:argile-ai/argile-lib-python.git)
-- `remi-web-ui/` - Frontend NextJS (git@github.com:ai-remi/remi-web-ui.git)
-
-Each story in `prd.json` specifies which repo it targets via the `repo` field.
-
 ## Commands
 
-```bash
-# Run Ralph (from argile-app/)
-./ralph/ralph.sh [max_iterations]
-```
+### `/ralph <feature>`
+Generate a structured implementation plan from a feature description.
+
+### `/prd`
+Convert `plan.md` into `prd.json` for execution.
+
+### `./ralph.sh [max_iterations]`
+Run the autonomous execution loop.
 
 ## Key Files
 
-- `ralph.sh` - The bash loop that spawns fresh Claude Code instances
-- `prompt.md` - Instructions given to each Claude Code instance
-- `prd.json` - User stories with repo targets and pass status
-- `example-prd.json` - Example PRD format
+| File | Purpose |
+|------|---------|
+| `ralph.config.json` | Project configuration (repos, checks) |
+| `plan.md` | Generated plan (from /ralph) |
+| `prd.json` | Executable PRD (from /prd) |
+| `prompt.md` | Instructions for each iteration |
+| `progress.txt` | Accumulated learnings |
+| `ralph.sh` | Execution script |
+
+## Workflow
+
+1. User runs `/ralph <feature>` to generate a plan
+2. User reviews/edits `plan.md`
+3. User runs `/prd` to convert to JSON
+4. User runs `./ralph.sh` to execute autonomously
 
 ## Patterns
 
-- Each iteration spawns a fresh Claude Code instance with clean context
-- Memory persists via git history (in each repo), `progress.txt`, and `prd.json`
+- Each iteration spawns a fresh Claude Code instance
+- Memory persists via git history, `progress.txt`, and `prd.json`
 - Stories should be small enough to complete in one context window
-- Backend stories (argile-lib-python) should come before frontend stories (remi-web-ui)
-- Always update CLAUDE.md in the target repo with discovered patterns
+- Backend stories should come before frontend stories
+- Always update CLAUDE.md in target repos with discovered patterns
+
+## Configuration
+
+Edit `ralph.config.json` to define:
+- Repository paths
+- Quality checks per repository
+- Max iterations

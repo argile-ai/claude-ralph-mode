@@ -1,0 +1,21 @@
+{
+  "$schema": "https://raw.githubusercontent.com/anthropics/ralph/main/schema/ralph.config.schema.json",
+  "version": "1.0",
+  "project": "MyProject",
+  "description": "Project description",
+  "repositories": {
+    "main": {
+      "path": ".",
+      "defaultBranch": "main",
+      "checks": [
+        "npm run build",
+        "npm run lint",
+        "npm test"
+      ]
+    }
+  },
+  "agent": {
+    "maxIterations": 50,
+    "timeout": 600
+  }
+}

@@ -4,228 +4,273 @@ Ralph is an autonomous AI agent loop that runs [Claude Code](https://claude.ai/c
 
 Based on [Geoffrey Huntley's Ralph pattern](https://ghuntley.com/ralph/).
 
-## Structure du projet argile-app
-
-**Important:** Ce projet contient deux repositories git distincts:
+## How It Works
 
 ```
-argile-app/
-├── argile-lib-python/      # Backend FastAPI (REPO GIT SEPARE)
-│   ├── .git/               # git@github.com:argile-ai/argile-lib-python.git
-│   └── CLAUDE.md
-├── remi-web-ui/            # Frontend NextJS (REPO GIT SEPARE)
-│   ├── .git/               # git@github.com:ai-remi/remi-web-ui.git
-│   └── CLAUDE.md
-├── ralph/                  # Configuration Ralph (ce dossier)
-│   ├── .claude/commands/
-│   ├── prompt.md
-│   ├── ralph.sh
-│   ├── prd.json            # A creer pour chaque feature
-│   └── progress.txt        # Learnings accumules
-└── CLAUDE.md
+┌─────────────────────────────────────────────────────────────┐
+│                     Ralph Workflow                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  1. /ralph <feature>     Generate a structured plan        │
+│         ↓                                                   │
+│  2. plan.md              Review and edit the plan          │
+│         ↓                                                   │
+│  3. /prd                 Convert plan to prd.json          │
+│         ↓                                                   │
+│  4. ./ralph.sh           Execute stories autonomously      │
+│         ↓                                                   │
+│  5. Commits + PRD        Each story committed separately   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
+
+## Quick Start
+
+### 1. Copy Ralph to Your Project
+
+```bash
+# Clone or copy the ralph folder to your project
+git clone https://github.com/anthropics/ralph.git my-project/ralph
+# Or as a submodule
+git submodule add https://github.com/anthropics/ralph.git ralph
+```
+
+### 2. Configure Your Project
+
+Edit `ralph/ralph.config.json`:
+
+```json
+{
+  "project": "MyProject",
+  "description": "My awesome project",
+  "repositories": {
+    "backend": {
+      "path": "./backend",
+      "checks": ["pytest", "mypy ."]
+    },
+    "frontend": {
+      "path": "./frontend",
+      "checks": ["npm run build", "npm run lint"]
+    }
+  }
+}
+```
+
+**Single repository?** Just use one entry:
+
+```json
+{
+  "project": "MyProject",
+  "repositories": {
+    "main": {
+      "path": ".",
+      "checks": ["npm run build", "npm test"]
+    }
+  }
+}
+```
+
+### 3. Generate a Plan
+
+Start Claude Code and run:
+
+```
+/ralph Add user authentication with OAuth support
+```
+
+Claude will:
+1. Ask 3-5 clarifying questions
+2. Generate `ralph/plan.md` with structured user stories
+3. Ask for validation
+
+### 4. Review and Validate
+
+Edit `ralph/plan.md` if needed, then:
+
+```
+/prd
+```
+
+This converts the plan to `ralph/prd.json`.
+
+### 5. Run Ralph
+
+```bash
+./ralph/ralph.sh
+```
+
+Ralph will:
+1. Pick the highest priority story with `passes: false`
+2. Navigate to the correct repository
+3. Create/checkout the feature branch
+4. Implement the story
+5. Run quality checks
+6. Commit if checks pass
+7. Update `prd.json` and repeat
 
 ## Prerequisites
 
 - [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed and authenticated
-- `jq` installed (`brew install jq` on macOS)
+- `jq` installed (`brew install jq` on macOS or `apt install jq` on Linux)
 
-## Usage depuis argile-app
-
-### 1. Creer un PRD pour une feature
-
-Depuis le dossier `argile-app/`, lancez Claude Code:
-
-```bash
-cd /Users/florentdrilhon/Argile/argile-app
-claude
-```
-
-Utilisez la commande `/prd`:
-```
-/prd Ajouter un systeme de notifications
-
-Backend (argile-lib-python):
-- Modele Notification en base
-- Endpoints CRUD pour les notifications
-
-Frontend (remi-web-ui):
-- Icone cloche dans le header
-- Panel de notifications
-```
-
-Le PRD sera sauvegarde dans `tasks/prd-[feature-name].md`.
-
-### 2. Convertir le PRD en format Ralph
+## Project Structure
 
 ```
-/ralph tasks/prd-notifications.md
+your-project/
+├── ralph/                    # Ralph configuration
+│   ├── .claude/
+│   │   └── commands/
+│   │       ├── ralph.md     # /ralph command
+│   │       └── prd.md       # /prd command
+│   ├── ralph.sh             # Execution script
+│   ├── ralph.config.json    # Your project config
+│   ├── prompt.md            # Instructions for each iteration
+│   ├── plan.md              # Generated plan (after /ralph)
+│   ├── prd.json             # Generated PRD (after /prd)
+│   └── progress.txt         # Accumulated learnings
+├── backend/                  # Your backend (example)
+└── frontend/                 # Your frontend (example)
 ```
 
-Cela cree `ralph/prd.json` avec:
-- Les branches pour chaque repo (`repositories`)
-- Les stories avec leur repo cible (`repo` field)
+## Configuration Reference
 
-### 3. Lancer Ralph
-
-```bash
-./ralph/ralph.sh [max_iterations]
-```
-
-Ralph va:
-1. Afficher les stories en attente et leur repo cible
-2. Prendre la story prioritaire avec `passes: false`
-3. Se placer dans le bon repo (`argile-lib-python` ou `remi-web-ui`)
-4. Creer/checkout la branche appropriee
-5. Implementer la story
-6. Lancer les checks qualite du repo
-7. Commit dans le bon repo
-8. Mettre a jour `prd.json`
-9. Repeter jusqu'a completion
-
-## Format du PRD (prd.json)
+### ralph.config.json
 
 ```json
 {
-  "project": "Notifications",
-  "description": "Systeme de notifications temps reel",
+  "$schema": "https://raw.githubusercontent.com/anthropics/ralph/main/schema/ralph.config.schema.json",
+  "version": "1.0",
+  "project": "MyProject",
+  "description": "Optional project description",
   "repositories": {
-    "argile-lib-python": {
-      "branchName": "feature/notifications"
-    },
-    "remi-web-ui": {
-      "branchName": "feature/notifications"
+    "repo-key": {
+      "path": "./relative/path",
+      "defaultBranch": "main",
+      "checks": [
+        "command1",
+        "command2"
+      ]
     }
+  },
+  "agent": {
+    "maxIterations": 50,
+    "timeout": 600
+  }
+}
+```
+
+### prd.json
+
+```json
+{
+  "project": "Feature Name",
+  "description": "What this feature does",
+  "repositories": {
+    "backend": { "branchName": "feature/my-feature" },
+    "frontend": { "branchName": "feature/my-feature" }
   },
   "userStories": [
     {
       "id": "US-001",
-      "title": "Add notifications table",
-      "repo": "argile-lib-python",
-      "description": "...",
-      "acceptanceCriteria": ["...", "Tests pass (pytest)"],
+      "title": "Add user model",
+      "repo": "backend",
+      "description": "As a developer, I need a user model...",
+      "acceptanceCriteria": [
+        "User model created with email, password fields",
+        "Migration generated",
+        "Tests pass"
+      ],
       "priority": 1,
       "passes": false,
-      "notes": ""
-    },
-    {
-      "id": "US-002",
-      "title": "Add notification bell component",
-      "repo": "remi-web-ui",
-      "description": "...",
-      "acceptanceCriteria": ["...", "Build passes", "Verify in browser"],
-      "priority": 2,
-      "passes": false,
+      "fork": false,
       "notes": ""
     }
   ]
 }
 ```
 
-**Champs cles:**
-- `repositories`: Branches a creer dans chaque repo
-- `repo` (par story): `argile-lib-python` ou `remi-web-ui`
-- `fork` (par story): `true` pour creer une nouvelle branche avant implementation
+## Commands
 
-## Forking de branches
+### `/ralph <feature description>`
 
-Ralph supporte le "forking" de branches pour permettre des iterations paralleles ou des changements de direction.
+Generate a structured implementation plan.
 
-### Quand utiliser le fork
+**Example:**
+```
+/ralph Add a notification system with email and push support
+```
 
-- `"fork": false` (defaut): Continuer sur la branche existante
-- `"fork": true`: Creer une nouvelle branche avant d'implementer la story
+### `/prd`
 
-### Comment ca marche
+Convert `plan.md` to `prd.json`.
 
-Quand `fork: true` est defini sur une story:
+### `./ralph.sh [max_iterations]`
 
-1. Ralph detecte le numero de fork suivant (ex: `feature/task-1`, `feature/task-2`)
-2. Cree une nouvelle branche depuis la branche courante
-3. Met a jour `repositories[repo].activeBranch` dans le PRD
-4. Continue l'implementation sur cette nouvelle branche
+Run the autonomous loop.
 
-### Exemple
+**Options:**
+- `max_iterations`: Maximum iterations before stopping (default: 50)
+
+**Example:**
+```bash
+./ralph.sh 10  # Run max 10 iterations
+```
+
+## Story Guidelines
+
+### Size
+- Each story must be completable in ONE Claude Code iteration
+- If it can't be described in 2-3 sentences, split it
+- One story = One focused change in ONE repository
+
+### Order
+1. Database/schema changes first
+2. API/backend logic second
+3. Frontend components third
+4. Integration/polish last
+
+### Acceptance Criteria
+- Must be objectively verifiable
+- Backend stories: Include "Tests pass"
+- Frontend stories: Include "Build passes" AND "Verify in browser"
+
+## Branch Forking
+
+For significant direction changes, use `fork: true` in a story:
 
 ```json
 {
-  "repositories": {
-    "argile-lib-python": {
-      "branchName": "feature/notifications",
-      "activeBranch": "feature/notifications-2"
-    }
-  },
-  "userStories": [
-    {
-      "id": "US-005",
-      "title": "Refactor notification logic",
-      "repo": "argile-lib-python",
-      "fork": true,
-      "passes": false
-    }
-  ]
+  "id": "US-005",
+  "title": "Refactor auth system",
+  "fork": true,
+  "passes": false
 }
 ```
 
-Dans cet exemple, `activeBranch` indique que Ralph travaille sur `feature/notifications-2` (fork #2).
-
-## Ordre des stories
-
-Les stories backend doivent etre avant les stories frontend:
-
-1. **argile-lib-python**: Schema/migrations
-2. **argile-lib-python**: Endpoints API
-3. **remi-web-ui**: Composants UI
-4. **remi-web-ui**: Integration/pages
-
-## Quality Checks
-
-### argile-lib-python
-```bash
-cd argile-lib-python
-uvl pytest .          # Tests
-uvl mypy .          # Types
-ruff check .              # Lint
-```
-
-### remi-web-ui
-```bash
-cd remi-web-ui
-npm run build             # Build + types
-npm run lint              # Lint
-npm run test                  # Tests
-```
-
-## Key Files
-
-| File | Purpose |
-|------|---------|
-| `ralph/ralph.sh` | Script de boucle autonome |
-| `ralph/prompt.md` | Instructions pour chaque iteration |
-| `ralph/prd.json` | Stories avec status et repo cible |
-| `ralph/progress.txt` | Learnings par repo |
-| `ralph/.claude/commands/prd.md` | Commande `/prd` |
-| `ralph/.claude/commands/ralph.md` | Commande `/ralph` |
+Ralph will create a new branch (e.g., `feature/auth-2`) from the current one.
 
 ## Debugging
 
 ```bash
-# Voir les stories par repo
-cat ralph/prd.json | jq '.userStories[] | {id, repo, title, passes}'
+# View pending stories
+cat ralph/prd.json | jq '.userStories[] | select(.passes == false) | {id, repo, title}'
 
-# Branches actuelles
-cd argile-lib-python && git branch --show-current
-cd remi-web-ui && git branch --show-current
-
-# Learnings
+# View progress
 cat ralph/progress.txt
+
+# Check branches
+git branch -a
 ```
 
-## Archivage
+## Archiving
 
-Ralph archive automatiquement les runs precedents quand vous changez de projet. Les archives sont dans `ralph/archive/YYYY-MM-DD-project-name/`.
+Ralph automatically archives previous runs when you start a new project. Archives are saved in `ralph/archive/YYYY-MM-DD-project-name/`.
 
 ## References
 
 - [Geoffrey Huntley's Ralph article](https://ghuntley.com/ralph/)
 - [Claude Code documentation](https://docs.anthropic.com/en/docs/claude-code)
+
+## License
+
+MIT License - see [LICENSE](LICENSE)
