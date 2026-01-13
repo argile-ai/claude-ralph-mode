@@ -42,7 +42,15 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/anthropics/ralph"
+    "url": "git+https://github.com/anthropics/ralph.git"
+  },
+  "homepage": "https://github.com/anthropics/ralph#readme",
+  "bugs": {
+    "url": "https://github.com/anthropics/ralph/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
     "chalk": "^5.3.0",
