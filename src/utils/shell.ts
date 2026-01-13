@@ -1,4 +1,4 @@
-import { execa, type Options as ExecaOptions } from "execa";
+import { execa, execaSync, type Options as ExecaOptions } from "execa";
 
 export interface ShellResult {
   stdout: string;
@@ -17,9 +17,9 @@ export async function run(
   });
 
   return {
-    stdout: result.stdout,
-    stderr: result.stderr,
-    exitCode: result.exitCode,
+    stdout: String(result.stdout ?? ""),
+    stderr: String(result.stderr ?? ""),
+    exitCode: result.exitCode ?? 1,
   };
 }
 
@@ -34,15 +34,15 @@ export async function runCommand(
   });
 
   return {
-    stdout: result.stdout,
-    stderr: result.stderr,
-    exitCode: result.exitCode,
+    stdout: String(result.stdout ?? ""),
+    stderr: String(result.stderr ?? ""),
+    exitCode: result.exitCode ?? 1,
   };
 }
 
 export function isCommandAvailable(command: string): boolean {
   try {
-    const result = execa.sync("which", [command], { reject: false });
+    const result = execaSync("which", [command], { reject: false });
     return result.exitCode === 0;
   } catch {
     return false;
