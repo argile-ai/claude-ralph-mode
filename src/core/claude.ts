@@ -44,11 +44,9 @@ export async function invokeClaude(
     args.push("--dangerously-skip-permissions");
   }
 
-  if (options.ultrathink) {
-    args.push("--ultrathink");
-  }
-
-  args.push(prompt);
+  // Prefix prompt with "ultrathink" keyword to enable extended thinking mode
+  const finalPrompt = options.ultrathink ? `ultrathink ${prompt}` : prompt;
+  args.push(finalPrompt);
 
   const result = await execa("claude", args, {
     cwd: options.cwd,
@@ -77,11 +75,9 @@ export async function invokeClaudeStreaming(
     args.push("--dangerously-skip-permissions");
   }
 
-  if (options.ultrathink) {
-    args.push("--ultrathink");
-  }
-
-  args.push(prompt);
+  // Prefix prompt with "ultrathink" keyword to enable extended thinking mode
+  const finalPrompt = options.ultrathink ? `ultrathink ${prompt}` : prompt;
+  args.push(finalPrompt);
 
   // Stream output to stderr while capturing stdout
   const subprocess = execa("claude", args, {

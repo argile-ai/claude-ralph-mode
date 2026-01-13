@@ -54,7 +54,8 @@ export async function planCommand(
   // Note: This runs claude in interactive mode for Q&A with ultrathink enabled for better planning
   const { execa } = await import("execa");
 
-  const subprocess = execa("claude", ["--ultrathink", prompt], {
+  // Prefix prompt with "ultrathink" keyword to enable extended thinking mode
+  const subprocess = execa("claude", [`ultrathink ${prompt}`], {
     cwd,
     stdio: "inherit",
     reject: false,
