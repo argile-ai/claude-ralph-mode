@@ -67,6 +67,8 @@ export async function invokeClaudeStreaming(
 
   const args: string[] = [];
 
+  // --print only prints output without executing tools
+  // For autonomous mode, we need to pass prompt via stdin without --print
   if (options.print) {
     args.push("--print");
   }
@@ -77,13 +79,19 @@ export async function invokeClaudeStreaming(
 
   // Prefix prompt with "ultrathink" keyword to enable extended thinking mode
   const finalPrompt = options.ultrathink ? `ultrathink ${prompt}` : prompt;
-  args.push(finalPrompt);
+
+  // If not in print mode, pass prompt via stdin to allow tool execution
+  // If in print mode, pass as argument (text-only response)
+  if (options.print) {
+    args.push(finalPrompt);
+  }
 
   // Stream output to stderr while capturing stdout
   const subprocess = execa("claude", args, {
     cwd: options.cwd,
     timeout: options.timeout ? options.timeout * 1000 : undefined,
     reject: false,
+    input: options.print ? undefined : finalPrompt,
   });
 
   // Pipe stderr to process stderr for real-time output

@@ -140,7 +140,7 @@ async function runLoop(maxIterations: number, cwd: string): Promise<void> {
     logger.info("Starting Claude Code iteration...");
 
     const output = await invokeClaudeStreaming(PROMPT_TEMPLATE, {
-      print: true,
+      print: false,  // Must be false to allow Claude to execute tools
       skipPermissions: true,
       cwd,
     });
