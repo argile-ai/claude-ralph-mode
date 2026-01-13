@@ -7,6 +7,13 @@ progress.txt
 # Archives (user-specific)
 archive/
 
+# Build output
+dist/
+node_modules/
+
+# Generated templates (built from templates/)
+src/templates/embedded/
+
 # OS files
 .DS_Store
 Thumbs.db
