@@ -2,8 +2,9 @@
 
 # 🤖 Ralph + 🧠 Claude
 
-<img src="https://media.giphy.com/media/3o7btPCcdNniyf0ArS/giphy.gif" alt="Ralph" width="150" />
-<img src="https://upload.wikimedia.org/wikipedia/commons/8/8a/Claude_AI_logo.svg" alt="Claude" width="150" />
+<img src="assets/ralph-wiggum.png" alt="Ralph" width="120" />
+<img src="assets/plus.png" alt="+" width="50" />
+<img src="assets/claude-code-logo.jpg" alt="Claude Code" width="120" />
 
 **Autonomous AI Agent Loop for Claude Code**
 
