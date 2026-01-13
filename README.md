@@ -21,8 +21,27 @@ Based on [Geoffrey Huntley's Ralph pattern](https://ghuntley.com/ralph/) 🎩
 
 ---
 
+## 🤔 Why Ralph CLI over the official Claude Code plugin?
+
+| Feature | Ralph CLI | Claude Code Built-in |
+|---------|-----------|---------------------|
+| **Context Management** | ✅ Fresh context each iteration | ❌ Context accumulates and degrades |
+| **Memory Persistence** | ✅ Git + `progress.txt` + `prd.json` | ❌ Lost between sessions |
+| **Multi-repo Support** | ✅ Native support for monorepos | ❌ Single repo at a time |
+| **Quality Gates** | ✅ Automated checks between stories | ❌ Manual verification |
+| **Progress Tracking** | ✅ Structured PRD with status | ❌ No built-in tracking |
+| **Branch Management** | ✅ Auto-create, fork, checkout | ❌ Manual git operations |
+| **Iteration Control** | ✅ Configurable max iterations | ❌ No automatic limits |
+
+**The key insight:** Claude Code's context window fills up over long sessions, degrading output quality. Ralph solves this by spawning **fresh instances** for each story, using files as persistent memory instead of relying on in-context state.
+
+> 💡 *"The 'Ralph' pattern is about context hygiene. Each iteration starts clean, with only the essential context loaded from files."*
+
+---
+
 ## 📑 Table of Contents
 
+- [🤔 Why Ralph CLI?](#-why-ralph-cli-over-the-official-claude-code-plugin)
 - [🚀 How It Works](#-how-it-works)
 - [📦 Installation](#-installation)
 - [⚡ Quick Start](#-quick-start)
