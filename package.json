@@ -38,15 +38,15 @@
     "automation",
     "cli"
   ],
-  "author": "",
+  "author": "Argile",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/anthropics/ralph.git"
+    "url": "git+https://github.com/argile-ai/claude-ralph-mode.git"
   },
-  "homepage": "https://github.com/anthropics/ralph#readme",
+  "homepage": "https://github.com/argile-ai/claude-ralph-mode#readme",
   "bugs": {
-    "url": "https://github.com/anthropics/ralph/issues"
+    "url": "https://github.com/argile-ai/claude-ralph-mode/issues"
   },
   "publishConfig": {
     "access": "public",
