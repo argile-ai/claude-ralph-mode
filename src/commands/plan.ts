@@ -51,10 +51,10 @@ export async function planCommand(
   logger.log("");
 
   // Invoke Claude interactively (without --print to allow interaction)
-  // Note: This runs claude in interactive mode for Q&A
+  // Note: This runs claude in interactive mode for Q&A with ultrathink enabled for better planning
   const { execa } = await import("execa");
 
-  const subprocess = execa("claude", [prompt], {
+  const subprocess = execa("claude", ["--ultrathink", prompt], {
     cwd,
     stdio: "inherit",
     reject: false,

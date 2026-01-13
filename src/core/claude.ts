@@ -13,6 +13,7 @@ export class ClaudeNotFoundError extends Error {
 export interface ClaudeOptions {
   print?: boolean;
   skipPermissions?: boolean;
+  ultrathink?: boolean;
   cwd?: string;
   timeout?: number;
 }
@@ -43,6 +44,10 @@ export async function invokeClaude(
     args.push("--dangerously-skip-permissions");
   }
 
+  if (options.ultrathink) {
+    args.push("--ultrathink");
+  }
+
   args.push(prompt);
 
   const result = await execa("claude", args, {
@@ -70,6 +75,10 @@ export async function invokeClaudeStreaming(
 
   if (options.skipPermissions) {
     args.push("--dangerously-skip-permissions");
+  }
+
+  if (options.ultrathink) {
+    args.push("--ultrathink");
   }
 
   args.push(prompt);
