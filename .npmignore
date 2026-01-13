@@ -1,0 +1,27 @@
+# Source files (dist is published)
+src/
+scripts/
+templates/
+tests/
+
+# Config files
+tsconfig.json
+tsup.config.ts
+vitest.config.ts
+.gitignore
+
+# Development files
+.github/
+.claude/
+examples/
+
+# Generated files (user-specific)
+plan.md
+prd.json
+progress.txt
+.last-project
+archive/
+
+# Misc
+*.md
+!README.md

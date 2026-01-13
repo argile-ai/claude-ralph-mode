@@ -1,43 +1,93 @@
-# Ralph
+<div align="center">
 
-Ralph is an autonomous AI agent loop that runs [Claude Code](https://claude.ai/code) repeatedly until all PRD items are complete. Each iteration is a fresh Claude Code instance with clean context.
+# 🤖 Ralph + 🧠 Claude
 
-Based on [Geoffrey Huntley's Ralph pattern](https://ghuntley.com/ralph/).
+<img src="assets/ralph-wiggum.png" alt="Ralph" width="120" />
+<img src="assets/plus.png" alt="+" width="50" />
+<img src="assets/claude-code-logo.jpg" alt="Claude Code" width="120" />
 
-## How It Works
+**Autonomous AI Agent Loop for Claude Code**
+
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/anthropics/ralph/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node](https://img.shields.io/badge/node-%3E%3D18-green.svg)](https://nodejs.org/)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-compatible-purple.svg)](https://claude.ai/code)
+
+*Run Claude Code repeatedly until all PRD items are complete. Each iteration is a fresh instance with clean context.*
+
+Based on [Geoffrey Huntley's Ralph pattern](https://ghuntley.com/ralph/) 🎩
+
+</div>
+
+---
+
+## 📑 Table of Contents
+
+- [🚀 How It Works](#-how-it-works)
+- [📦 Installation](#-installation)
+- [⚡ Quick Start](#-quick-start)
+- [💻 CLI Commands](#-cli-commands)
+- [📋 Prerequisites](#-prerequisites)
+- [⚙️ Configuration Reference](#️-configuration-reference)
+- [📝 Story Guidelines](#-story-guidelines)
+- [🔀 Branch Forking](#-branch-forking)
+- [📁 Archiving](#-archiving)
+- [🛠️ Development](#️-development)
+- [📚 References](#-references)
+- [📄 License](#-license)
+
+---
+
+## 🚀 How It Works
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     Ralph Workflow                          │
+│                     🔄 Ralph Workflow                        │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  1. /ralph <feature>     Generate a structured plan        │
+│  1. ralph init             🎯 Initialize configuration      │
 │         ↓                                                   │
-│  2. plan.md              Review and edit the plan          │
+│  2. ralph plan <feature>   📝 Generate a structured plan    │
 │         ↓                                                   │
-│  3. /prd                 Convert plan to prd.json          │
+│  3. ralph prd              🔧 Convert plan to prd.json      │
 │         ↓                                                   │
-│  4. ./ralph.sh           Execute stories autonomously      │
+│  4. ralph run              🤖 Execute stories autonomously  │
 │         ↓                                                   │
-│  5. Commits + PRD        Each story committed separately   │
+│  5. Commits + PRD          ✅ Each story committed          │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Quick Start
+---
 
-### 1. Copy Ralph to Your Project
+## 📦 Installation
 
 ```bash
-# Clone or copy the ralph folder to your project
-git clone https://github.com/anthropics/ralph.git my-project/ralph
-# Or as a submodule
-git submodule add https://github.com/anthropics/ralph.git ralph
+npm install -g claude-ralph
 ```
 
-### 2. Configure Your Project
+Or use npx without installing:
 
-Edit `ralph/ralph.config.json`:
+```bash
+npx claude-ralph <command>
+```
+
+---
+
+## ⚡ Quick Start
+
+### 1️⃣ Initialize Ralph in Your Project
+
+```bash
+cd your-project
+ralph init
+```
+
+This creates `ralph.config.json` with your project settings.
+
+### 2️⃣ Configure Your Project
+
+Edit `ralph.config.json`:
 
 ```json
 {
@@ -70,69 +120,116 @@ Edit `ralph/ralph.config.json`:
 }
 ```
 
-### 3. Generate a Plan
+### 3️⃣ Generate a Plan
 
-Start Claude Code and run:
-
-```
-/ralph Add user authentication with OAuth support
+```bash
+ralph plan "Add user authentication with OAuth support"
 ```
 
 Claude will:
-1. Ask 3-5 clarifying questions
-2. Generate `ralph/plan.md` with structured user stories
-3. Ask for validation
+1. 🤔 Ask 3-5 clarifying questions
+2. 📄 Generate `plan.md` with structured user stories
+3. ✅ Ask for validation
 
-### 4. Review and Validate
+### 4️⃣ Convert to PRD
 
-Edit `ralph/plan.md` if needed, then:
-
-```
-/prd
-```
-
-This converts the plan to `ralph/prd.json`.
-
-### 5. Run Ralph
+Review and edit `plan.md` if needed, then:
 
 ```bash
-./ralph/ralph.sh
+ralph prd
+```
+
+This converts the plan to `prd.json`.
+
+### 5️⃣ Run Ralph
+
+```bash
+ralph run
 ```
 
 Ralph will:
-1. Pick the highest priority story with `passes: false`
-2. Navigate to the correct repository
-3. Create/checkout the feature branch
-4. Implement the story
-5. Run quality checks
-6. Commit if checks pass
-7. Update `prd.json` and repeat
+1. 🎯 Pick the highest priority story with `passes: false`
+2. 📂 Navigate to the correct repository
+3. 🌿 Create/checkout the feature branch
+4. 💻 Implement the story
+5. 🧪 Run quality checks
+6. ✅ Commit if checks pass
+7. 🔄 Update `prd.json` and repeat
 
-## Prerequisites
+### 6️⃣ Check Status
 
-- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed and authenticated
-- `jq` installed (`brew install jq` on macOS or `apt install jq` on Linux)
-
-## Project Structure
-
-```
-your-project/
-├── ralph/                    # Ralph configuration
-│   ├── .claude/
-│   │   └── commands/
-│   │       ├── ralph.md     # /ralph command
-│   │       └── prd.md       # /prd command
-│   ├── ralph.sh             # Execution script
-│   ├── ralph.config.json    # Your project config
-│   ├── prompt.md            # Instructions for each iteration
-│   ├── plan.md              # Generated plan (after /ralph)
-│   ├── prd.json             # Generated PRD (after /prd)
-│   └── progress.txt         # Accumulated learnings
-├── backend/                  # Your backend (example)
-└── frontend/                 # Your frontend (example)
+```bash
+ralph status
+ralph status --verbose
 ```
 
-## Configuration Reference
+---
+
+## 💻 CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `ralph init` | 🎯 Initialize Ralph configuration |
+| `ralph plan <feature>` | 📝 Generate a structured implementation plan |
+| `ralph prd` | 🔧 Convert `plan.md` to `prd.json` |
+| `ralph run` | 🤖 Run the autonomous agent loop |
+| `ralph status` | 📊 Show current progress and status |
+
+### `ralph init`
+
+Initialize Ralph configuration in the current directory.
+
+```bash
+ralph init
+ralph init --force  # Overwrite existing config
+```
+
+### `ralph plan <feature>`
+
+Generate a structured implementation plan.
+
+```bash
+ralph plan "Add a notification system with email and push support"
+ralph plan "Refactor the auth module" --output custom-plan.md
+```
+
+### `ralph prd`
+
+Convert `plan.md` to `prd.json`.
+
+```bash
+ralph prd
+ralph prd --input custom-plan.md --output custom-prd.json
+```
+
+### `ralph run`
+
+Run the autonomous agent loop.
+
+```bash
+ralph run
+ralph run --max-iterations 10  # Limit iterations
+```
+
+### `ralph status`
+
+Show current progress and status.
+
+```bash
+ralph status
+ralph status --verbose  # Show detailed information
+```
+
+---
+
+## 📋 Prerequisites
+
+- 🧠 [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed and authenticated
+- 📦 Node.js 18 or later
+
+---
+
+## ⚙️ Configuration Reference
 
 ### ralph.config.json
 
@@ -158,6 +255,12 @@ your-project/
   }
 }
 ```
+
+Configuration can also be stored in:
+- `.ralphrc`
+- `.ralphrc.json`
+- `.ralphrc.yaml`
+- `package.json` under the `"ralph"` key
 
 ### prd.json
 
@@ -189,52 +292,29 @@ your-project/
 }
 ```
 
-## Commands
+---
 
-### `/ralph <feature description>`
+## 📝 Story Guidelines
 
-Generate a structured implementation plan.
-
-**Example:**
-```
-/ralph Add a notification system with email and push support
-```
-
-### `/prd`
-
-Convert `plan.md` to `prd.json`.
-
-### `./ralph.sh [max_iterations]`
-
-Run the autonomous loop.
-
-**Options:**
-- `max_iterations`: Maximum iterations before stopping (default: 50)
-
-**Example:**
-```bash
-./ralph.sh 10  # Run max 10 iterations
-```
-
-## Story Guidelines
-
-### Size
-- Each story must be completable in ONE Claude Code iteration
+### 📏 Size
+- Each story must be completable in **ONE** Claude Code iteration
 - If it can't be described in 2-3 sentences, split it
 - One story = One focused change in ONE repository
 
-### Order
-1. Database/schema changes first
-2. API/backend logic second
-3. Frontend components third
-4. Integration/polish last
+### 📊 Order
+1. 🗄️ Database/schema changes first
+2. ⚙️ API/backend logic second
+3. 🎨 Frontend components third
+4. 🔗 Integration/polish last
 
-### Acceptance Criteria
+### ✅ Acceptance Criteria
 - Must be objectively verifiable
 - Backend stories: Include "Tests pass"
 - Frontend stories: Include "Build passes" AND "Verify in browser"
 
-## Branch Forking
+---
+
+## 🔀 Branch Forking
 
 For significant direction changes, use `fork: true` in a story:
 
@@ -249,28 +329,43 @@ For significant direction changes, use `fork: true` in a story:
 
 Ralph will create a new branch (e.g., `feature/auth-2`) from the current one.
 
-## Debugging
+---
+
+## 📁 Archiving
+
+Ralph automatically archives previous runs when you start a new project. Archives are saved in `archive/YYYY-MM-DD-project-name/`.
+
+---
+
+## 🛠️ Development
+
+To build from source:
 
 ```bash
-# View pending stories
-cat ralph/prd.json | jq '.userStories[] | select(.passes == false) | {id, repo, title}'
-
-# View progress
-cat ralph/progress.txt
-
-# Check branches
-git branch -a
+git clone https://github.com/anthropics/ralph.git
+cd ralph
+npm install
+npm run build
+npm link  # Makes 'ralph' command available globally
 ```
 
-## Archiving
+---
 
-Ralph automatically archives previous runs when you start a new project. Archives are saved in `ralph/archive/YYYY-MM-DD-project-name/`.
+## 📚 References
 
-## References
+- 🎩 [Geoffrey Huntley's Ralph article](https://ghuntley.com/ralph/)
+- 🧠 [Claude Code documentation](https://docs.anthropic.com/en/docs/claude-code)
 
-- [Geoffrey Huntley's Ralph article](https://ghuntley.com/ralph/)
-- [Claude Code documentation](https://docs.anthropic.com/en/docs/claude-code)
+---
 
-## License
+## 📄 License
 
 MIT License - see [LICENSE](LICENSE)
+
+---
+
+<div align="center">
+
+Made with 💜 by the community
+
+</div>
