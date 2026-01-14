@@ -1,6 +1,6 @@
 {
   "name": "claude-ralph",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Autonomous AI agent loop for Claude Code - Execute PRD user stories automatically",
   "type": "module",
   "bin": {
