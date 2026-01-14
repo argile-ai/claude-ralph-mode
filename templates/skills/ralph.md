@@ -130,9 +130,29 @@ After generating the plan, present it to the user and ask:
 Plan generated and saved to `plan.md`.
 
 Would you like to:
-A) Validate and proceed to PRD generation (/prd)
+A) Validate the plan (I'm satisfied)
 B) Make modifications (describe what to change)
 C) Start over with different requirements
+```
+
+If user chooses A, display this completion message:
+
+```
+✅ Plan validated and saved to `plan.md`
+
+═══════════════════════════════════════════════════════════════
+                         NEXT STEPS
+═══════════════════════════════════════════════════════════════
+
+1. Exit this Claude session (Ctrl+C or type "exit")
+
+2. Convert the plan to executable PRD:
+   $ ralph prd
+
+3. Run the autonomous execution:
+   $ ralph run
+
+═══════════════════════════════════════════════════════════════
 ```
 
 If user chooses B, make the requested modifications and re-validate.
@@ -143,7 +163,7 @@ If user chooses B, make the requested modifications and re-validate.
 
 **File:** `plan.md`
 
-The plan file will be used by the `/prd` command to generate the executable `prd.json`.
+The plan file will be used by the `ralph prd` command to generate the executable `prd.json`.
 
 ---
 
