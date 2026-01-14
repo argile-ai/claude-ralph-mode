@@ -55,7 +55,8 @@ export async function planCommand(
   const { execa } = await import("execa");
 
   // Prefix prompt with "ultrathink" keyword to enable extended thinking mode
-  const subprocess = execa("claude", [`ultrathink ${prompt}`], {
+  // Use --dangerously-skip-permissions to bypass permission prompts
+  const subprocess = execa("claude", ["--dangerously-skip-permissions", `ultrathink ${prompt}`], {
     cwd,
     stdio: "inherit",
     reject: false,
