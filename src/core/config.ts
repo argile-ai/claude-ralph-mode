@@ -1,32 +1,32 @@
-import { cosmiconfig } from "cosmiconfig";
-import { RalphConfigSchema, type RalphConfig } from "../types/index.js";
+import { cosmiconfig } from 'cosmiconfig';
+import { type RalphConfig, RalphConfigSchema } from '../types/index.js';
 
-const MODULE_NAME = "ralph";
+const MODULE_NAME = 'ralph';
 
 const explorer = cosmiconfig(MODULE_NAME, {
   searchPlaces: [
-    "ralph.config.json",
-    ".ralphrc",
-    ".ralphrc.json",
-    ".ralphrc.yaml",
-    ".ralphrc.yml",
-    "package.json",
+    'ralph.config.json',
+    '.ralphrc',
+    '.ralphrc.json',
+    '.ralphrc.yaml',
+    '.ralphrc.yml',
+    'package.json',
   ],
 });
 
 export class ConfigNotFoundError extends Error {
   constructor(searchPath: string) {
     super(
-      `No Ralph configuration found. Run 'ralph init' to create one, or create ralph.config.json manually.\nSearched from: ${searchPath}`
+      `No Ralph configuration found. Run 'ralph init' to create one, or create ralph.config.json manually.\nSearched from: ${searchPath}`,
     );
-    this.name = "ConfigNotFoundError";
+    this.name = 'ConfigNotFoundError';
   }
 }
 
 export class ConfigValidationError extends Error {
   constructor(message: string) {
     super(`Invalid configuration: ${message}`);
-    this.name = "ConfigValidationError";
+    this.name = 'ConfigValidationError';
   }
 }
 
@@ -53,14 +53,14 @@ export async function configExists(cwd: string = process.cwd()): Promise<boolean
 
 export function getDefaultConfig(projectName: string): RalphConfig {
   return {
-    version: "1.0",
+    version: '1.0',
     project: projectName,
-    description: "Project description",
+    description: 'Project description',
     repositories: {
       main: {
-        path: ".",
-        defaultBranch: "main",
-        checks: ["npm run build", "npm run lint", "npm test"],
+        path: '.',
+        defaultBranch: 'main',
+        checks: ['npm run build', 'npm run lint', 'npm test'],
       },
     },
     agent: {

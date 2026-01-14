@@ -1,25 +1,25 @@
-import fs from "fs-extra";
-import path from "path";
-import { PrdSchema, type Prd, type UserStory } from "../types/index.js";
+import path from 'node:path';
+import fs from 'fs-extra';
+import { type Prd, PrdSchema, type UserStory } from '../types/index.js';
 
 export class PrdNotFoundError extends Error {
   constructor(filePath: string) {
     super(
-      `PRD file not found: ${filePath}\nRun 'ralph plan <feature>' and 'ralph prd' to generate one.`
+      `PRD file not found: ${filePath}\nRun 'ralph plan <feature>' and 'ralph prd' to generate one.`,
     );
-    this.name = "PrdNotFoundError";
+    this.name = 'PrdNotFoundError';
   }
 }
 
 export class PrdValidationError extends Error {
   constructor(message: string) {
     super(`Invalid PRD: ${message}`);
-    this.name = "PrdValidationError";
+    this.name = 'PrdValidationError';
   }
 }
 
 export async function loadPrd(cwd: string = process.cwd()): Promise<Prd> {
-  const prdPath = path.join(cwd, "prd.json");
+  const prdPath = path.join(cwd, 'prd.json');
 
   if (!(await fs.pathExists(prdPath))) {
     throw new PrdNotFoundError(prdPath);
@@ -36,19 +36,17 @@ export async function loadPrd(cwd: string = process.cwd()): Promise<Prd> {
 }
 
 export async function savePrd(prd: Prd, cwd: string = process.cwd()): Promise<void> {
-  const prdPath = path.join(cwd, "prd.json");
+  const prdPath = path.join(cwd, 'prd.json');
   await fs.writeJSON(prdPath, prd, { spaces: 2 });
 }
 
 export async function prdExists(cwd: string = process.cwd()): Promise<boolean> {
-  const prdPath = path.join(cwd, "prd.json");
+  const prdPath = path.join(cwd, 'prd.json');
   return fs.pathExists(prdPath);
 }
 
 export function getPendingStories(prd: Prd): UserStory[] {
-  return prd.userStories
-    .filter((story) => !story.passes)
-    .sort((a, b) => a.priority - b.priority);
+  return prd.userStories.filter((story) => !story.passes).sort((a, b) => a.priority - b.priority);
 }
 
 export function getCompletedStories(prd: Prd): UserStory[] {

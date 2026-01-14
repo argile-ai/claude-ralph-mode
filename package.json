@@ -27,8 +27,22 @@
     "dev": "tsup --watch",
     "test": "vitest",
     "test:run": "vitest run",
-    "lint": "tsc --noEmit",
-    "prepublishOnly": "npm run build"
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint src/",
+    "lint:fix": "biome lint --write src/",
+    "format": "biome format --write src/",
+    "format:check": "biome format src/",
+    "check": "biome check src/",
+    "check:fix": "biome check --write src/",
+    "knip": "knip",
+    "quality": "npm run typecheck && npm run check && npm run knip",
+    "prepublishOnly": "npm run build",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "biome check --write --no-errors-on-unmatched"
+    ]
   },
   "keywords": [
     "claude",
@@ -62,8 +76,12 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.3.11",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^22.10.5",
+    "husky": "^9.1.7",
+    "knip": "^5.81.0",
+    "lint-staged": "^16.2.7",
     "tsup": "^8.3.5",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",

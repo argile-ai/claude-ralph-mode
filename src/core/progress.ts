@@ -1,11 +1,11 @@
-import fs from "fs-extra";
-import path from "path";
+import path from 'node:path';
+import fs from 'fs-extra';
 
-const PROGRESS_FILE = "progress.txt";
+const PROGRESS_FILE = 'progress.txt';
 
 export async function initProgressFile(
   projectName: string,
-  cwd: string = process.cwd()
+  cwd: string = process.cwd(),
 ): Promise<void> {
   const progressPath = path.join(cwd, PROGRESS_FILE);
 
@@ -34,29 +34,26 @@ export async function progressExists(cwd: string = process.cwd()): Promise<boole
   return fs.pathExists(progressPath);
 }
 
-export async function appendProgress(
-  entry: string,
-  cwd: string = process.cwd()
-): Promise<void> {
+export async function appendProgress(entry: string, cwd: string = process.cwd()): Promise<void> {
   const progressPath = path.join(cwd, PROGRESS_FILE);
-  await fs.appendFile(progressPath, entry + "\n");
+  await fs.appendFile(progressPath, `${entry}\n`);
 }
 
 export async function readProgress(cwd: string = process.cwd()): Promise<string> {
   const progressPath = path.join(cwd, PROGRESS_FILE);
 
   if (!(await fs.pathExists(progressPath))) {
-    return "";
+    return '';
   }
 
-  return fs.readFile(progressPath, "utf-8");
+  return fs.readFile(progressPath, 'utf-8');
 }
 
 export async function getRecentProgress(
   lines: number = 50,
-  cwd: string = process.cwd()
+  cwd: string = process.cwd(),
 ): Promise<string> {
   const content = await readProgress(cwd);
-  const allLines = content.split("\n");
-  return allLines.slice(-lines).join("\n");
+  const allLines = content.split('\n');
+  return allLines.slice(-lines).join('\n');
 }

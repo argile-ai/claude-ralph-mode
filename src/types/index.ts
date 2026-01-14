@@ -1,9 +1,9 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 // Repository configuration schema
 export const RepositoryConfigSchema = z.object({
   path: z.string(),
-  defaultBranch: z.string().default("main"),
+  defaultBranch: z.string().default('main'),
   checks: z.array(z.string()).default([]),
 });
 
@@ -47,7 +47,7 @@ export const UserStorySchema = z.object({
   priority: z.number(),
   passes: z.boolean().default(false),
   fork: z.boolean().default(false),
-  notes: z.string().default(""),
+  notes: z.string().default(''),
 });
 
 export type UserStory = z.infer<typeof UserStorySchema>;
