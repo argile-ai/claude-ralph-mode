@@ -8,7 +8,7 @@
 
 **Autonomous AI Agent Loop for Claude Code**
 
-[![Version](https://img.shields.io/badge/version-1.0.2-blue.svg)](https://github.com/anthropics/ralph/releases)
+[![Version](https://img.shields.io/badge/version-1.0.4-blue.svg)](https://github.com/anthropics/ralph/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-green.svg)](https://nodejs.org/)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-compatible-purple.svg)](https://claude.ai/code)
