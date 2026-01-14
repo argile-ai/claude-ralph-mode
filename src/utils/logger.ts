@@ -1,20 +1,20 @@
-import chalk from "chalk";
+import chalk from 'chalk';
 
 export const logger = {
   info(message: string): void {
-    console.log(chalk.blue("[INFO]"), message);
+    console.log(chalk.blue('[INFO]'), message);
   },
 
   success(message: string): void {
-    console.log(chalk.green("[SUCCESS]"), message);
+    console.log(chalk.green('[SUCCESS]'), message);
   },
 
   warning(message: string): void {
-    console.log(chalk.yellow("[WARNING]"), message);
+    console.log(chalk.yellow('[WARNING]'), message);
   },
 
   error(message: string): void {
-    console.log(chalk.red("[ERROR]"), message);
+    console.log(chalk.red('[ERROR]'), message);
   },
 
   log(message: string): void {
@@ -22,19 +22,19 @@ export const logger = {
   },
 
   header(title: string): void {
-    console.log("");
-    console.log(chalk.bold("========================================"));
+    console.log('');
+    console.log(chalk.bold('========================================'));
     console.log(chalk.bold(`  ${title}`));
-    console.log(chalk.bold("========================================"));
-    console.log("");
+    console.log(chalk.bold('========================================'));
+    console.log('');
   },
 
   divider(): void {
-    console.log(chalk.gray("----------------------------------------"));
+    console.log(chalk.gray('----------------------------------------'));
   },
 
   list(items: string[], indent = 2): void {
-    const prefix = " ".repeat(indent) + "- ";
+    const prefix = `${' '.repeat(indent)}- `;
     for (const item of items) {
       console.log(prefix + item);
     }

@@ -1,12 +1,10 @@
-import { execa } from "execa";
-import { isCommandAvailable } from "../utils/shell.js";
+import { execa } from 'execa';
+import { isCommandAvailable } from '../utils/shell.js';
 
 export class ClaudeNotFoundError extends Error {
   constructor() {
-    super(
-      "Claude Code CLI not found. Install it from: https://claude.ai/code"
-    );
-    this.name = "ClaudeNotFoundError";
+    super('Claude Code CLI not found. Install it from: https://claude.ai/code');
+    this.name = 'ClaudeNotFoundError';
   }
 }
 
@@ -19,7 +17,7 @@ export interface ClaudeOptions {
 }
 
 export function isClaudeInstalled(): boolean {
-  return isCommandAvailable("claude");
+  return isCommandAvailable('claude');
 }
 
 export function checkClaudeInstalled(): void {
@@ -28,31 +26,28 @@ export function checkClaudeInstalled(): void {
   }
 }
 
-export async function invokeClaude(
-  prompt: string,
-  options: ClaudeOptions = {}
-): Promise<string> {
+export async function invokeClaude(prompt: string, options: ClaudeOptions = {}): Promise<string> {
   checkClaudeInstalled();
 
   const args: string[] = [];
 
   if (options.print) {
-    args.push("--print");
+    args.push('--print');
   }
 
   if (options.skipPermissions) {
-    args.push("--dangerously-skip-permissions");
+    args.push('--dangerously-skip-permissions');
   }
 
   // Prefix prompt with "ultrathink" keyword to enable extended thinking mode
   const finalPrompt = options.ultrathink ? `ultrathink ${prompt}` : prompt;
   args.push(finalPrompt);
 
-  const result = await execa("claude", args, {
+  const result = await execa('claude', args, {
     cwd: options.cwd,
     timeout: options.timeout ? options.timeout * 1000 : undefined,
-    stdout: "pipe",
-    stderr: "inherit",
+    stdout: 'pipe',
+    stderr: 'inherit',
     reject: false,
   });
 
@@ -61,7 +56,7 @@ export async function invokeClaude(
 
 export async function invokeClaudeStreaming(
   prompt: string,
-  options: ClaudeOptions = {}
+  options: ClaudeOptions = {},
 ): Promise<string> {
   checkClaudeInstalled();
 
@@ -70,11 +65,11 @@ export async function invokeClaudeStreaming(
   // --print only prints output without executing tools
   // For autonomous mode, we need to pass prompt via stdin without --print
   if (options.print) {
-    args.push("--print");
+    args.push('--print');
   }
 
   if (options.skipPermissions) {
-    args.push("--dangerously-skip-permissions");
+    args.push('--dangerously-skip-permissions');
   }
 
   // Prefix prompt with "ultrathink" keyword to enable extended thinking mode
@@ -87,7 +82,7 @@ export async function invokeClaudeStreaming(
   }
 
   // Stream output to stderr while capturing stdout
-  const subprocess = execa("claude", args, {
+  const subprocess = execa('claude', args, {
     cwd: options.cwd,
     timeout: options.timeout ? options.timeout * 1000 : undefined,
     reject: false,

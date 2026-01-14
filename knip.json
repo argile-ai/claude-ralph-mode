@@ -1,0 +1,10 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "project": ["src/**/*.ts"],
+  "ignore": ["src/templates/embedded/**", "src/templates/index.ts"],
+  "ignoreDependencies": ["ora", "@vitest/coverage-v8"],
+  "ignoreBinaries": ["claude", "which"],
+  "rules": {
+    "exports": "warn"
+  }
+}

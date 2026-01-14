@@ -1,17 +1,14 @@
-import fs from "fs-extra";
-import path from "path";
-import { logger } from "../utils/logger.js";
-import { loadConfig, ConfigNotFoundError } from "../core/config.js";
-import { checkClaudeInstalled } from "../core/claude.js";
-import { RALPH_SKILL } from "../templates/embedded/index.js";
-import type { PlanOptions } from "../types/index.js";
+import path from 'node:path';
+import fs from 'fs-extra';
+import { checkClaudeInstalled } from '../core/claude.js';
+import { ConfigNotFoundError, loadConfig } from '../core/config.js';
+import { RALPH_SKILL } from '../templates/embedded/index.js';
+import type { PlanOptions } from '../types/index.js';
+import { logger } from '../utils/logger.js';
 
-export async function planCommand(
-  feature: string,
-  options: PlanOptions = {}
-): Promise<void> {
+export async function planCommand(feature: string, options: PlanOptions = {}): Promise<void> {
   const cwd = process.cwd();
-  const outputPath = options.output ?? path.join(cwd, "plan.md");
+  const outputPath = options.output ?? path.join(cwd, 'plan.md');
 
   // Check prerequisites
   checkClaudeInstalled();
@@ -22,20 +19,22 @@ export async function planCommand(
     config = await loadConfig(cwd);
   } catch (error) {
     if (error instanceof ConfigNotFoundError) {
-      logger.warning("No configuration found. Run 'ralph init' first, or create ralph.config.json manually.");
-      logger.info("Continuing without configuration...");
+      logger.warning(
+        "No configuration found. Run 'ralph init' first, or create ralph.config.json manually.",
+      );
+      logger.info('Continuing without configuration...');
       config = null;
     } else {
       throw error;
     }
   }
 
-  logger.header("Ralph - Plan Generator");
-  logger.keyValue("Feature", feature);
+  logger.header('Ralph - Plan Generator');
+  logger.keyValue('Feature', feature);
   if (config) {
-    logger.keyValue("Project", config.project);
+    logger.keyValue('Project', config.project);
   }
-  logger.log("");
+  logger.log('');
 
   // Build prompt
   let prompt = RALPH_SKILL;
@@ -46,19 +45,19 @@ export async function planCommand(
 
   prompt += `\n\n## Feature Request\n\n${feature}`;
 
-  logger.info("Starting interactive plan generation...");
-  logger.info("Claude will ask clarifying questions. Please respond in the terminal.");
-  logger.log("");
+  logger.info('Starting interactive plan generation...');
+  logger.info('Claude will ask clarifying questions. Please respond in the terminal.');
+  logger.log('');
 
   // Invoke Claude interactively (without --print to allow interaction)
   // Note: This runs claude in interactive mode for Q&A with ultrathink enabled for better planning
-  const { execa } = await import("execa");
+  const { execa } = await import('execa');
 
   // Prefix prompt with "ultrathink" keyword to enable extended thinking mode
   // Use --dangerously-skip-permissions to bypass permission prompts
-  const subprocess = execa("claude", ["--dangerously-skip-permissions", `ultrathink ${prompt}`], {
+  const subprocess = execa('claude', ['--dangerously-skip-permissions', `ultrathink ${prompt}`], {
     cwd,
-    stdio: "inherit",
+    stdio: 'inherit',
     reject: false,
   });
 
@@ -66,14 +65,14 @@ export async function planCommand(
 
   // Check if plan.md was created
   if (await fs.pathExists(outputPath)) {
-    logger.log("");
+    logger.log('');
     logger.success(`Plan generated: ${outputPath}`);
-    logger.log("");
-    logger.log("Next steps:");
-    logger.log("  1. Review and edit plan.md if needed");
-    logger.log("  2. Run: ralph prd");
-    logger.log("  3. Run: ralph run");
+    logger.log('');
+    logger.log('Next steps:');
+    logger.log('  1. Review and edit plan.md if needed');
+    logger.log('  2. Run: ralph prd');
+    logger.log('  3. Run: ralph run');
   } else {
-    logger.warning("Plan file was not created. You may need to re-run the command.");
+    logger.warning('Plan file was not created. You may need to re-run the command.');
   }
 }

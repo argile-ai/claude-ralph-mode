@@ -1,9 +1,9 @@
-import { run } from "../utils/shell.js";
-import fs from "fs-extra";
-import path from "path";
+import path from 'node:path';
+import fs from 'fs-extra';
+import { run } from '../utils/shell.js';
 
 export async function isGitRepo(dir: string): Promise<boolean> {
-  const gitDir = path.join(dir, ".git");
+  const gitDir = path.join(dir, '.git');
   return fs.pathExists(gitDir);
 }
 
@@ -12,41 +12,29 @@ export async function getCurrentBranch(cwd: string): Promise<string | null> {
     return null;
   }
 
-  const result = await run("git", ["branch", "--show-current"], { cwd });
+  const result = await run('git', ['branch', '--show-current'], { cwd });
 
   if (result.exitCode !== 0) {
     return null;
   }
 
-  return result.stdout.trim() || "detached";
+  return result.stdout.trim() || 'detached';
 }
 
-export async function branchExists(
-  branchName: string,
-  cwd: string
-): Promise<boolean> {
-  const result = await run("git", ["branch", "--list", branchName], { cwd });
+export async function branchExists(branchName: string, cwd: string): Promise<boolean> {
+  const result = await run('git', ['branch', '--list', branchName], { cwd });
   return result.stdout.trim().length > 0;
 }
 
-export async function checkout(
-  branchName: string,
-  cwd: string,
-  create = false
-): Promise<boolean> {
-  const args = create
-    ? ["checkout", "-b", branchName]
-    : ["checkout", branchName];
+export async function checkout(branchName: string, cwd: string, create = false): Promise<boolean> {
+  const args = create ? ['checkout', '-b', branchName] : ['checkout', branchName];
 
-  const result = await run("git", args, { cwd });
+  const result = await run('git', args, { cwd });
   return result.exitCode === 0;
 }
 
-export async function getExistingForkBranches(
-  baseBranch: string,
-  cwd: string
-): Promise<string[]> {
-  const result = await run("git", ["branch", "--list", `${baseBranch}-*`], {
+export async function getExistingForkBranches(baseBranch: string, cwd: string): Promise<string[]> {
+  const result = await run('git', ['branch', '--list', `${baseBranch}-*`], {
     cwd,
   });
 
@@ -55,15 +43,12 @@ export async function getExistingForkBranches(
   }
 
   return result.stdout
-    .split("\n")
-    .map((b) => b.trim().replace(/^\*?\s*/, ""))
+    .split('\n')
+    .map((b) => b.trim().replace(/^\*?\s*/, ''))
     .filter((b) => b.length > 0);
 }
 
-export async function getNextForkBranch(
-  baseBranch: string,
-  cwd: string
-): Promise<string> {
+export async function getNextForkBranch(baseBranch: string, cwd: string): Promise<string> {
   const existing = await getExistingForkBranches(baseBranch, cwd);
 
   if (existing.length === 0) {
@@ -93,7 +78,7 @@ export async function getRepoStatus(cwd: string): Promise<{
   }
 
   const branch = await getCurrentBranch(cwd);
-  const statusResult = await run("git", ["status", "--porcelain"], { cwd });
+  const statusResult = await run('git', ['status', '--porcelain'], { cwd });
   const hasChanges = statusResult.stdout.trim().length > 0;
 
   return { isRepo, branch, hasChanges };
